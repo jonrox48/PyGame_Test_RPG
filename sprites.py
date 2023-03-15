@@ -88,14 +88,20 @@ class Player(pygame.sprite.Sprite):
                         sprite.rect.x += PLAYER_SPEED
                     self.rect.x = hits[0].rect.left - self.rect.width
                 if self.x_change < 0:
+                    for sprite in self.game.all_sprites:
+                        sprite.rect.x -= PLAYER_SPEED
                     self.rect.x = hits[0].rect.right
                     
         if direction == 'y':
             hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
             if hits:
                 if self.y_change > 0:
+                    for sprite in self.game.all_sprites:
+                        sprite.rect.y += PLAYER_SPEED
                     self.rect.y = hits[0].rect.top - self.rect.height
                 if self.y_change < 0:
+                    for sprite in self.game.all_sprites:
+                        sprite.rect.y -= PLAYER_SPEED
                     self.rect.y = hits[0].rect.bottom
     
     
@@ -422,8 +428,7 @@ class Ground(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y        
-        
-        
+              
 class Button:
     def __init__(self, x, y, width, height, fg_col, bg_col, content, fontsize):
         self.font = pygame.font.Font('fonts/ARIAL.TTF', fontsize)
