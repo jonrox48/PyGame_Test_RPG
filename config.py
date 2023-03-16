@@ -14,7 +14,7 @@ FPS = 60
 ## Layer order
 GROUND_LAYER = 1
 BLOCK_LAYER = 2
-ENEMY_LAYER =3
+NON_PLAYER_LAYER =3
 PLAYER_LAYER = 4
 
 ## Colors
@@ -25,7 +25,7 @@ WHITE = (255, 255, 255)
 
 ## Speeds
 PLAYER_SPEED = 3
-ENEMY_SPEED = 2
+NON_PLAYER_SPEED = 2
 
 
 tilemap = [
