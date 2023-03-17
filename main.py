@@ -9,6 +9,7 @@ import pygame
 from sprites import *
 from config import *
 from characters import *
+from enemies import *
 import sys
 
 
@@ -19,6 +20,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font('fonts/ARIAL.TTF', 32)
         self.running = True
+        self.events_list = []
         
         self.character_spritesheet = Spritesheet('img/character.png')
         self.terrain_spritesheet = Spritesheet('img/terrain.png')
@@ -35,48 +37,52 @@ class Game:
                 Ground(self, j, i)
                 if column == "B":
                     Collision_Block(self, j, i)
-                if column == "E":
-                    Non_Player(self, j, i)
-                if column == "P":
+                elif column == "E":
+                    Zombie(self, j, i)
+                elif column == "N":
+                    Villager(self, j, i)
+                elif column == "P":
                     self.player = Player(self, j, i)
                 
         
     def new(self):
         # a new game starts
         self.playing = True
-        
+        ## All
         self.all_sprites = pygame.sprite.LayeredUpdates()
+        
+        ## High level groups
         self.player_group = pygame.sprite.LayeredUpdates()
+        self.non_player = pygame.sprite.LayeredUpdates()        
+        
+        ## Friendlies
+        self.villagers = pygame.sprite.LayeredUpdates()
+        
+        ## Enemies
+        self.enemies = pygame.sprite.LayeredUpdates()
+        self.zombies = pygame.sprite.LayeredUpdates()
+        
+        ## Terrain Indestructable
         self.blocks = pygame.sprite.LayeredUpdates()
-        self.non_player = pygame.sprite.LayeredUpdates()
+        
+        ## Terrain Destructable
+        
+        ## Attacks
         self.attacks = pygame.sprite.LayeredUpdates()
         
         self.createTilemap()
-        x=1
         
     def events(self):
-        for event in pygame.event.get():
+        ## Game Level Actions
+        self.events_list = pygame.event.get()
+        for event in self.events_list:
             if event.type == pygame.QUIT:
                 self.playing = False
                 self.running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    if self.player.facing == 'up':
-                        Attack(self, self.player.rect.x, self.player.rect.y - TILE_SIZE)
-                    if self.player.facing == 'down':
-                        Attack(self, self.player.rect.x, self.player.rect.y + TILE_SIZE)
-                    if self.player.facing == 'left':
-                        Attack(self, self.player.rect.x - TILE_SIZE, self.player.rect.y)
-                    if self.player.facing == 'right':
-                        Attack(self, self.player.rect.x + TILE_SIZE, self.player.rect.y)
         
+    ## Every Sprite must have an update method
     def update(self):
-        self.player_group.update()
-        self.blocks.update()
-        self.non_player.update()
-        self.attacks.update()
-
-        # self.all_sprites.update()
+        self.all_sprites.update()
         
     def draw(self):
         self.screen.fill(BLACK)

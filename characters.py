@@ -13,16 +13,20 @@ from sprites import *
 import pdb
 import numpy as np
 
+## Purely Parent Class. No loading animations
 class Character(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):        
+    def __init__(self, game, x, y):
+        self.game = game        
+        
+        self.groups = [self.game.all_sprites]
         ####################################################################
         ########################## CONFIGURATION ###########################
         ####################################################################
         ## Define which game object it is a part ot
-        self.game = game
+
         
         ## Define which groups this sprite should be a part of 
-        self.groups = self.game.all_sprites
+        # self.add(self.game.all_sprites)
         
         ## Sprite Dimensions
         self.width = TILE_SIZE
@@ -30,7 +34,7 @@ class Character(pygame.sprite.Sprite):
         
         # ## Sprite Image
         ## Define which layer this sprite should be drawn in 
-        self._layer = []        
+        self._layer = []
         self.spritesheet = []
         self.rect = []
         self.speed = []
@@ -142,6 +146,7 @@ class Character(pygame.sprite.Sprite):
 
 class Player(Character):
     def __init__(self, game, x, y):
+        ## Inherit from Character class
         super().__init__(game, x, y)
         ####################################################################
         ########################## CONFIGURATION ###########################
@@ -150,10 +155,9 @@ class Player(Character):
         self._layer = PLAYER_LAYER
         self.speed = PLAYER_SPEED
         
-        self.groups = self.game.all_sprites, self.game.player_group
-        
-        ## Initialize inherited pygame Sprite Class
-        pygame.sprite.Sprite.__init__(self, self.groups)
+        ## Define which groups this sprite should be a part of 
+        self.groups.append(self.game.player_group)
+        pygame.sprite.Sprite.__init__(self, tuple(self.groups))
         
         ## Sprite Image
         self.spritesheet = self.game.character_spritesheet
@@ -161,41 +165,39 @@ class Player(Character):
         pixel_y_start = 2
         
         #######################################################################
-        ########################## ANIMATIONS #####################################
+        ########################## ANIMATIONS #################################
         #######################################################################
         self.load_animations(pixel_x_start, pixel_y_start)
   
     def update(self):
-        self.movement()
+        self.events()
         self.animate()
         
-        self.rect.x += self.x_change        
-        self.collide_non_player_character('x')        
+        self.rect.x += self.x_change
+        self.collide_enemies_character('x')
         self.collide_blocks('x')
-        self.rect.y += self.y_change        
-        self.collide_non_player_character('y')        
+        self.rect.y += self.y_change
+        self.collide_enemies_character('y')
         self.collide_blocks('y')
         
         for sprite in self.game.all_sprites:
             sprite.rect.x -= self.x_change
             sprite.rect.y -= self.y_change
-            
+        
         self.x_change = 0
         self.y_change = 0
     
-    def collide_non_player_character(self, direction):        
+    def collide_enemies_character(self, direction):  
+        hits = pygame.sprite.spritecollide(self, self.game.enemies, False)        
         if direction == 'x':
-            hits = pygame.sprite.spritecollide(self, self.game.non_player, False)
             if hits:
                 self.kill()
                 self.game.playing = False
         if direction == 'y':
-            hits = pygame.sprite.spritecollide(self, self.game.non_player, False)
             if hits:
                 self.kill()
                 self.game.playing = False
 
-            
     def collide_blocks(self, direction):
         if direction == 'x':
             hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
@@ -206,7 +208,6 @@ class Player(Character):
                 if self.x_change < 0:
                     self.x_change = 0
                     self.rect.x = hits[0].rect.right
-                    
         if direction == 'y':
             hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
             if hits:
@@ -217,9 +218,9 @@ class Player(Character):
                     self.y_change = 0
                     self.rect.y = hits[0].rect.bottom            
                     
-    def movement(self):
+    def events(self):
         keys = pygame.key.get_pressed()
-        
+        ## Movement
         if keys[pygame.K_LEFT]:
             self.x_change -= self.speed
             self.facing = 'left'
@@ -231,12 +232,45 @@ class Player(Character):
             self.facing = 'up'
         if keys[pygame.K_DOWN]:
             self.y_change += self.speed
-            self.facing = 'down'
+            self.facing = 'down'            
+        
+        ## For Single button Presses
+        for event in self.game.events_list:
+            if event.type == pygame.KEYDOWN:
+                ## Basic attack
+                if event.key == pygame.K_SPACE:
+                    if self.facing == 'up':
+                        Attack(self.game, self.rect.x, self.rect.y - TILE_SIZE)
+                    if self.facing == 'down':
+                        Attack(self.game, self.rect.x, self.rect.y + TILE_SIZE)
+                    if self.facing == 'left':
+                        Attack(self.game, self.rect.x - TILE_SIZE, self.rect.y)
+                    if self.facing == 'right':
+                        Attack(self.game, self.rect.x + TILE_SIZE, self.rect.y)
+        
+
+
+    # def movement(self):
+    #     keys = pygame.key.get_pressed()
+        
+    #     if keys[pygame.K_LEFT]:
+    #         self.x_change -= self.speed
+    #         self.facing = 'left'
+    #     if keys[pygame.K_RIGHT]:
+    #         self.x_change += self.speed
+    #         self.facing = 'right'
+    #     if keys[pygame.K_UP]:
+    #         self.y_change -= self.speed
+    #         self.facing = 'up'
+    #     if keys[pygame.K_DOWN]:
+    #         self.y_change += self.speed
+    #         self.facing = 'down'
             
 
-                    
+## Purely Parent Class. No loading animations    
 class Non_Player(Character):
     def __init__(self, game, x, y): 
+        ## Inherit from Character class
         super().__init__(game, x, y)
         ####################################################################
         ########################## CONFIGURATION ###########################
@@ -247,15 +281,12 @@ class Non_Player(Character):
         self.speed = NON_PLAYER_SPEED
         
         ## Define which groups this sprite should be a part of 
-        self.groups = self.game.all_sprites, self.game.non_player
+        self.groups.append(self.game.non_player)
         
-        ## Initialize inherited pygame Sprite Class
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        
-        ## Sprite Image
-        self.spritesheet = self.game.non_player_spritesheet
-        pixel_x_start = 3
-        pixel_y_start = 2
+        # ## Sprite Image
+        # self.spritesheet = self.game.character_spritesheet
+        # pixel_x_start = 3
+        # pixel_y_start = 2
         
         ## NPC "BRAIN"
         self.command_current = random.choice(['up', 'down', 'left', 'right'])
@@ -263,9 +294,9 @@ class Non_Player(Character):
         self.command_loop = 0
 
         #######################################################################
-        ########################## ANIMATIONS #####################################
+        ########################## ANIMATIONS #################################
         #######################################################################
-        self.load_animations(pixel_x_start, pixel_y_start)
+        # self.load_animations(pixel_x_start, pixel_y_start)
         
         
     # Update for all non-player characters
@@ -282,10 +313,8 @@ class Non_Player(Character):
         
         self.rect.x += self.x_change
         self.collide_blocks('x')
-        # self.collide_player_character('x')
         self.rect.y += self.y_change
         self.collide_blocks('y')
-        # self.collide_player_character('y')
         
         self.x_change = 0
         self.y_change = 0
@@ -304,19 +333,23 @@ class Non_Player(Character):
         if self.command_current == 'down':
             self.y_change += self.speed
             self.facing = 'down'
-            
-    # def collide_player_character(self, direction):
-    #     if direction == 'x':
-    #         hits = pygame.sprite.spritecollide(self, self.game.player_group, False)
-    #         if hits:
-    #             if self.x_change > 0:
-    #                 self.rect.x = hits[0].rect.left - self.rect.width
-    #             if self.x_change < 0:
-    #                 self.rect.x = hits[0].rect.right
-    #     if direction == 'y':
-    #         hits = pygame.sprite.spritecollide(self, self.game.player_group, False)
-    #         if hits:
-    #             if self.y_change > 0:
-    #                 self.rect.y = hits[0].rect.top - self.rect.height
-    #             if self.y_change < 0:
-    #                 self.rect.y = hits[0].rect.bottom
+
+
+class Villager(Non_Player):
+    def __init__(self, game, x, y):        
+        ## Inherit from Character class
+        super().__init__(game, x, y)
+        ## Sprite Image
+        
+        ## Lowest level group so initialize groups 
+        self.groups.append(self.game.villagers)
+        pygame.sprite.Sprite.__init__(self, tuple(self.groups))
+        
+        self.spritesheet = self.game.character_spritesheet
+        pixel_x_start = 3
+        pixel_y_start = 2        
+        
+        #######################################################################
+        ########################## ANIMATIONS #################################
+        #######################################################################
+        self.load_animations(pixel_x_start, pixel_y_start)
