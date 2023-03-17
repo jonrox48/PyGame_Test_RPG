@@ -5,12 +5,16 @@ Created on Wed Mar 15 09:54:10 2023
 @author: j91722
 """
 
+import sys
 import pygame
+from gui import *
 from sprites import *
 from config import *
 from characters import *
 from enemies import *
-import sys
+from non_collision_blocks import *
+from collision_blocks import *
+from attacks import *
 
 
 class Game:
@@ -34,9 +38,9 @@ class Game:
     def createTilemap(self):
         for i, row in enumerate(tilemap):
             for j, column in enumerate(row):
-                Ground(self, j, i)
+                Grass(self, j, i)
                 if column == "B":
-                    Collision_Block(self, j, i)
+                    Rock(self, j, i)
                 elif column == "E":
                     Zombie(self, j, i)
                 elif column == "N":
@@ -52,6 +56,7 @@ class Game:
         self.all_sprites = pygame.sprite.LayeredUpdates()
         
         ## High level groups
+        self.characters = pygame.sprite.LayeredUpdates()
         self.player_group = pygame.sprite.LayeredUpdates()
         self.non_player = pygame.sprite.LayeredUpdates()        
         
@@ -63,7 +68,8 @@ class Game:
         self.zombies = pygame.sprite.LayeredUpdates()
         
         ## Terrain Indestructable
-        self.blocks = pygame.sprite.LayeredUpdates()
+        self.collision_blocks = pygame.sprite.LayeredUpdates()
+        self.non_collision_blocks = pygame.sprite.LayeredUpdates() 
         
         ## Terrain Destructable
         

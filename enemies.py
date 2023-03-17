@@ -7,9 +7,6 @@ Created on Thu Mar 16 10:13:06 2023
 
 import pygame
 from config import *
-import math
-import random
-from sprites import *
 from characters import *
 
 

@@ -6,44 +6,33 @@ Created on Thu Mar 16 10:12:30 2023
 """
 
 import pygame
-from config import *
 import math
 import random
+from config import *
 from sprites import *
-import pdb
-import numpy as np
+from attacks import *
+# import numpy as np
 
 ## Purely Parent Class. No loading animations
-class Character(pygame.sprite.Sprite):
+class Character(Sprite):
     def __init__(self, game, x, y):
-
         ####################################################################
         ########################## CONFIGURATION ###########################
-        ####################################################################
-        ## Define which game object it is a part ot
-        self.game = game        
-        ## Define which groups this sprite should be a part of         
-        self.groups = [self.game.all_sprites]
-        
-        ## Sprite Dimensions
-        self.width = TILE_SIZE
-        self.height = TILE_SIZE
+        ####################################################################        
+        ## Inherit from Sprite class
+        super().__init__(game, x, y)     
+        ## Define which groups this sprite should be a part of
+        self.groups.append(self.game.characters)
         
         #######################################################################
         ########################## STATUS #####################################
         #######################################################################
         ## Current Orientation
         self.facing = 'down'
-        # 2 total animations
-        self.animation_loop = 1
-        self.animation_num_of_frames = 3
-        self.animation_speed_base = 0.03
         
-        ## Current Location
-        self.x = x * TILE_SIZE
-        self.y = y * TILE_SIZE
-        
-        ## Temp Variables
+        #######################################################################
+        ########################## TEMP VARIABLES #############################
+        #######################################################################
         self.x_change = 0
         self.y_change = 0
         
@@ -67,7 +56,7 @@ class Character(pygame.sprite.Sprite):
         
     def collide_blocks(self, direction):
         if direction == 'x':
-            hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
+            hits = pygame.sprite.spritecollide(self, self.game.collision_blocks, False)
             if hits:
                 if self.x_change > 0:
                     self.x_change = 0
@@ -77,7 +66,7 @@ class Character(pygame.sprite.Sprite):
                     self.rect.x = hits[0].rect.right
                 return True
         if direction == 'y':
-            hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
+            hits = pygame.sprite.spritecollide(self, self.game.collision_blocks, False)
             if hits:
                 if self.y_change > 0:
                     self.y_change = 0
