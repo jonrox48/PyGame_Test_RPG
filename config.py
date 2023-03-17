@@ -23,9 +23,14 @@ BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 
-## Speeds
+## Player stats
 PLAYER_SPEED = 3
-NON_PLAYER_SPEED = 2
+
+## Villager stats
+VILLAGER_SPEED = 2
+
+## Zombie Stats
+ZOMBIE_SPEED = 4
 
 
 tilemap = [
