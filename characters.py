@@ -11,6 +11,7 @@ import random
 from settings import *
 from sprites import *
 from attacks import *
+from debug import debug
 # import numpy as np
 
 ## Purely Parent Class. No loading animations
@@ -23,7 +24,7 @@ class Character(Sprite):
         super().__init__(level, x, y)     
         ## Define which groups this sprite should be a part of
         self.groups.append(self.level.characters)
-        
+        self.level = level
         #######################################################################
         ########################## STATUS #####################################
         #######################################################################
@@ -113,8 +114,33 @@ class Character(Sprite):
                 if self.animation_loop >= len(self.right_animations):
                     self.animation_loop = 1
                     
+    # def move(self, speed):
+    #     self.rect.center += self.direction * speed
+        
     def move(self, speed):
-        self.rect.center += self.direction * speed
+        x_movement = self.direction.x * speed
+        y_movement = self.direction.y * speed
+        
+        self.rect.x += x_movement
+        if self.collide_blocks('x'):
+            self.rect.x -= x_movement
+            x_movement = 0
+        else:
+            if x_movement > 0:
+                self.facing = 'right'
+            elif x_movement < 0:
+                self.facing = 'left'
+                
+        self.rect.y += y_movement
+        if self.collide_blocks('y'):
+            self.rect.y -= y_movement
+            y_movement = 0
+        else:
+            if y_movement > 0:
+                self.facing = 'down'
+            elif y_movement < 0:
+                self.facing = 'up'
+
 
 class Player(Character):
     def __init__(self, level, x, y):
@@ -175,6 +201,11 @@ class Player(Character):
         #######################################################################
         ####################### BUTTONS THAT ARE HELD #########################
         ####################################################################### 
+        # for event in self.level.game.event_list:
+        #     if event.type == pygame.KEYDOWN:
+        #         ## Basic attack
+        #         if event.key == pygame.K_SPACE:
+        #             debug("Space")
         keys = pygame.key.get_pressed()
         ## Movement
         if keys[pygame.K_LEFT]:
@@ -194,11 +225,11 @@ class Player(Character):
             # self.facing = 'down'
         else:
             self.direction.y = 0            
-        
+            
         #######################################################################
         ####################### SINGLE BUTTON PRESSES #########################
         ####################################################################### 
-        for event in pygame.event.get():
+        for event in self.level.game.event_list:
             if event.type == pygame.KEYDOWN:
                 ## Basic attack
                 if event.key == pygame.K_SPACE:
@@ -319,8 +350,6 @@ class Non_Player(Character):
         else:
             self.direction.y = 0   
         
-  
-
 
 class Villager(Non_Player):
     def __init__(self, level, x, y):        

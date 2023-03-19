@@ -62,11 +62,12 @@ class Level():
                     self.player = Player(self, j, i)
 
     def run(self):
-        self.draw()        
+        self.draw()      
         self.update()
 
         
     def update(self):
+        self.game.event_list = pygame.event.get()
         self.all_sprites.update()
         
     def draw(self):

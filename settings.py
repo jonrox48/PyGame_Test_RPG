@@ -30,7 +30,7 @@ PLAYER_SPEED = 3
 VILLAGER_SPEED = 2
 
 ## Zombie Stats
-ZOMBIE_SPEED = 4
+ZOMBIE_SPEED = 2
 
 
 tilemap = [
