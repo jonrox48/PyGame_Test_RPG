@@ -6,7 +6,8 @@ Created on Wed Mar 15 09:54:28 2023
 """
 
 import pygame
-from config import *
+from settings import *
+# from levels import *
 import math
 
 class Spritesheet:
@@ -20,14 +21,14 @@ class Spritesheet:
         return sprite
     
 class Sprite(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, level, x, y):
         ####################################################################
         ########################## CONFIGURATION ###########################
         ####################################################################
         ## Define which game object it is a part ot
-        self.game = game        
+        self.level = level
         ## Define which groups this sprite should be a part of         
-        self.groups = [self.game.all_sprites]
+        self.groups = [self.level.all_sprites]
         
         ## Sprite Dimensions
         self.width = TILE_SIZE

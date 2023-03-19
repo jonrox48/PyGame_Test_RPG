@@ -9,99 +9,123 @@ import sys
 import pygame
 from gui import *
 from sprites import *
-from config import *
+from settings import *
 from characters import *
 from enemies import *
 from non_collision_blocks import *
 from collision_blocks import *
 from attacks import *
+from levels import Level
 
 
 class Game:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-        self.clock = pygame.time.Clock()
+        pygame.display.set_caption('Zelda')
+        self.clock = pygame.time.Clock()     
+        
         self.font = pygame.font.Font('fonts/ARIAL.TTF', 32)
         self.running = True
-        self.events_list = []
+        self.playing = False
         
-        self.character_spritesheet = Spritesheet('img/character.png')
-        self.terrain_spritesheet = Spritesheet('img/terrain.png')
-        self.non_player_spritesheet = Spritesheet('img/enemy.png')
-        self.attack_spritesheet = Spritesheet('img/attack.png')
+        self.level = Level(self)
+
         
         self.intro_background = pygame.image.load('img/introbackground.png')
         self.go_background = pygame.image.load('img/gameover.png')
 
 
-    def createTilemap(self):
-        for i, row in enumerate(tilemap):
-            for j, column in enumerate(row):
-                Grass(self, j, i)
-                if column == "B":
-                    Rock(self, j, i)
-                elif column == "E":
-                    Zombie(self, j, i)
-                elif column == "N":
-                    Villager(self, j, i)
-                elif column == "P":
-                    self.player = Player(self, j, i)
+
                 
+
+####################################################################
+########################## STARTING NEW GAME #######################
+####################################################################
+    # def new(self):
+    #     # a new game starts
+    #     s
+    #     # ## All
+    #     # self.all_sprites = pygame.sprite.LayeredUpdates()
         
-    def new(self):
-        # a new game starts
-        self.playing = True
-        ## All
-        self.all_sprites = pygame.sprite.LayeredUpdates()
+    #     # ## High level groups
+    #     # self.characters = pygame.sprite.LayeredUpdates()
+    #     # self.player_group = pygame.sprite.LayeredUpdates()
+    #     # self.non_player = pygame.sprite.LayeredUpdates()        
         
-        ## High level groups
-        self.characters = pygame.sprite.LayeredUpdates()
-        self.player_group = pygame.sprite.LayeredUpdates()
-        self.non_player = pygame.sprite.LayeredUpdates()        
+    #     # ## Friendlies
+    #     # self.villagers = pygame.sprite.LayeredUpdates()
         
-        ## Friendlies
-        self.villagers = pygame.sprite.LayeredUpdates()
+    #     # ## Enemies
+    #     # self.enemies = pygame.sprite.LayeredUpdates()
+    #     # self.zombies = pygame.sprite.LayeredUpdates()
         
-        ## Enemies
-        self.enemies = pygame.sprite.LayeredUpdates()
-        self.zombies = pygame.sprite.LayeredUpdates()
+    #     # ## Terrain Indestructable
+    #     # self.collision_blocks = pygame.sprite.LayeredUpdates()
+    #     # self.non_collision_blocks = pygame.sprite.LayeredUpdates() 
         
-        ## Terrain Indestructable
-        self.collision_blocks = pygame.sprite.LayeredUpdates()
-        self.non_collision_blocks = pygame.sprite.LayeredUpdates() 
+    #     # ## Terrain Destructable
         
-        ## Terrain Destructable
+    #     # ## Attacks
+    #     # self.attacks = pygame.sprite.LayeredUpdates()
         
-        ## Attacks
-        self.attacks = pygame.sprite.LayeredUpdates()
+    #     # self.createTilemap()
         
-        self.createTilemap()
+    # # def createTilemap(self):
+    # #     for i, row in enumerate(tilemap):
+    # #         for j, column in enumerate(row):
+    # #             Grass(self, j, i)
+    # #             if column == "B":
+    # #                 Rock(self, j, i)
+    # #             elif column == "E":
+    # #                 Zombie(self, j, i)
+    # #             elif column == "N":
+    # #                 Villager(self, j, i)
+    # #             elif column == "P":
+    # #                 self.player = Player(self, j, i)
+        
+####################################################################
+########################## RUNNING THE GAME ########################
+####################################################################
+    def run(self):
+        while self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            self.screen.fill(BLACK)                    
+            self.level.run()        
+            # self.events()
+            pygame.display.update()
+            self.clock.tick(FPS)
+            # self.update()
+            # self.draw()
+        pygame.quit()
+        sys.exit()
         
     def events(self):
         ## Game Level Actions
         self.events_list = pygame.event.get()
         for event in self.events_list:
             if event.type == pygame.QUIT:
+                
                 self.playing = False
                 self.running = False
         
-    ## Every Sprite must have an update method
-    def update(self):
-        self.all_sprites.update()
+    # ## Every Sprite must have an update method
+    # def update(self):
+    #     self.all_sprites.update()
         
-    def draw(self):
-        self.screen.fill(BLACK)
-        self.all_sprites.draw(self.screen)
-        self.clock.tick(FPS)
-        pygame.display.update()
+    # def draw(self):
+    #     self.screen.fill(BLACK)
+    #     self.all_sprites.draw(self.screen)
+    #     self.clock.tick(FPS)
+    #     pygame.display.update()
     
-    def main(self):
-        while self.playing:
-            self.events()
-            self.update()
-            self.draw()
-        # self.running = False
+
+####################################################################
+########################## DIFFERENT SCREENS #######################
+####################################################################
 
     def intro_screen(self):
         intro = True
@@ -121,6 +145,7 @@ class Game:
             
             if play_button.is_pressed(mouse_pos, mouse_pressed):
                 intro = False
+                self.playing = True
                 
             self.screen.blit(self.intro_background, (0,0))
             self.screen.blit(title, title_rect)
@@ -128,14 +153,13 @@ class Game:
             self.clock.tick(FPS)
             pygame.display.update()
             
+            
     def game_over(self):
         text = self.font.render('Game Over', True, WHITE)
         text_rect = text.get_rect(center=(WIN_WIDTH/2, WIN_HEIGHT/2))
         
         restart_button = Button(10, WIN_HEIGHT - 60, 120, 50, WHITE, BLACK, 'Restart', 32)
         
-        for sprite in self.all_sprites:
-            sprite.kill()
         
         while self.running:
             for event in pygame.event.get():
@@ -146,8 +170,8 @@ class Game:
             mouse_pressed = pygame.mouse.get_pressed()
             
             if restart_button.is_pressed(mouse_pos, mouse_pressed):
-                self.new()
-                self.main()
+                self.level = Level(self)
+                # self.main()
                 
             self.screen.blit(self.go_background, (0,0))
             self.screen.blit(text, text_rect)
@@ -155,18 +179,18 @@ class Game:
             self.clock.tick(FPS)
             pygame.display.update()
             
-    # def victory(self):
-    #     text = self.font.render('Victory!', True, WHITE)
-    #     text_rect = text.get_rect(center=())
                     
+####################################################################
+########################## BOILER PLATE ############################
+####################################################################
+if __name__ == '__main__':
+    g = Game()
+    g.intro_screen()
+    # g.new()
+    # while g.running:
+    g.run()
+        # g.game_over()
         
-g = Game()
-g.intro_screen()
-g.new()
-while g.running:
-    g.main()
-    g.game_over()
-    
-pygame.quit()
-sys.exit()
+    # pygame.quit()
+    # sys.exit()
 
