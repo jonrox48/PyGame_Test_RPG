@@ -31,12 +31,8 @@ class Character(Sprite):
         ## Current Orientation
         self.facing = 'down'
         self.direction = pygame.math.Vector2()
+        self.attacking = False
         
-        # #######################################################################
-        # ########################## TEMP VARIABLES #############################
-        # #######################################################################
-        # self.x_change = 0
-        # self.y_change = 0
         
     def load_animations(self, x_start, y_start):
         ## Load animations
@@ -114,6 +110,24 @@ class Character(Sprite):
                 if self.animation_loop >= len(self.right_animations):
                     self.animation_loop = 1
                     
+    def attack(self):
+        if self.facing == 'up':
+            Attack(self, self.rect.x, self.rect.y - TILE_SIZE)
+            self.direction.x = 0
+            self.direction.y = 0
+        if self.facing == 'down':
+            Attack(self, self.rect.x, self.rect.y + TILE_SIZE)
+            self.direction.x = 0
+            self.direction.y = 0
+        if self.facing == 'left':
+            Attack(self, self.rect.x - TILE_SIZE, self.rect.y)
+            self.direction.x = 0
+            self.direction.y = 0
+        if self.facing == 'right':
+            Attack(self, self.rect.x + TILE_SIZE, self.rect.y)
+            self.direction.x = 0
+            self.direction.y = 0
+        
     def move(self, speed):
         x_movement = self.direction.x * speed
         y_movement = self.direction.y * speed
@@ -193,30 +207,8 @@ class Player(Character):
                 self.kill()
                 self.level.game.playing = False
                     
+    
     def inputs(self):
-        #######################################################################
-        ####################### BUTTONS THAT ARE HELD #########################
-        ####################################################################### 
-        keys = pygame.key.get_pressed()
-        ## Movement
-        if keys[pygame.K_LEFT]:
-            self.direction.x = -1
-            # self.facing = 'left'
-        elif keys[pygame.K_RIGHT]:
-            self.direction.x = 1
-            # self.facing = 'right'
-        else:
-            self.direction.x = 0
-            
-        if keys[pygame.K_UP]:
-            self.direction.y = -1
-            # self.facing = 'up'
-        elif keys[pygame.K_DOWN]:
-            self.direction.y = 1
-            # self.facing = 'down'
-        else:
-            self.direction.y = 0            
-        
         #######################################################################
         ####################### SINGLE BUTTON PRESSES #########################
         ####################################################################### 
@@ -224,14 +216,30 @@ class Player(Character):
             if event.type == pygame.KEYDOWN:
                 ## Basic attack
                 if event.key == pygame.K_SPACE:
-                    if self.facing == 'up':
-                        Attack(self.level, self.rect.x, self.rect.y - TILE_SIZE, self._layer)
-                    if self.facing == 'down':
-                        Attack(self.level, self.rect.x, self.rect.y + TILE_SIZE, self._layer)
-                    if self.facing == 'left':
-                        Attack(self.level, self.rect.x - TILE_SIZE, self.rect.y, self._layer)
-                    if self.facing == 'right':
-                        Attack(self.level, self.rect.x + TILE_SIZE, self.rect.y, self._layer)
+                    self.attack()                        
+        if not self.attacking:
+            #######################################################################
+            ####################### BUTTONS THAT ARE HELD #########################
+            ####################################################################### 
+            keys = pygame.key.get_pressed()
+            ## Movement
+            if keys[pygame.K_LEFT]:
+                self.direction.x = -1
+                # self.facing = 'left'
+            elif keys[pygame.K_RIGHT]:
+                self.direction.x = 1
+                # self.facing = 'right'
+            else:
+                self.direction.x = 0
+                
+            if keys[pygame.K_UP]:
+                self.direction.y = -1
+                # self.facing = 'up'
+            elif keys[pygame.K_DOWN]:
+                self.direction.y = 1
+                # self.facing = 'down'
+            else:
+                self.direction.y = 0            
                         
     def move(self, speed):
         x_movement = self.direction.x * speed
@@ -264,7 +272,7 @@ class Player(Character):
             sprite.rect.x -= x_movement
             sprite.rect.y -= y_movement
             
-## Purely Parent Class. No loading animations    
+## Purely Parent Class. No loading animations
 class Non_Player(Character):
     def __init__(self, level, x, y): 
 
@@ -307,39 +315,41 @@ class Non_Player(Character):
         
     def npc_brain(self):
         ## Command Initializations
-        available_commands = ['wait', 'up', 'down', 'left', 'right']
+        available_commands = ['wait', 'attack', 'up', 'down', 'left', 'right']
         command_length_min = 60
         command_length_max = 120
         
-        
-        ### Decide what to do
-        ## If current command is still being executed
-        if self.command_loop < self.command_length:
-            self.command_loop += 1
-        ## If current command has ended, pick a new command
+        if self.attacking:
+            self.command_length = 0
         else:
-            self.command_current = random.choice(available_commands)
-            self.command_length = random.randint(command_length_min, command_length_max)
-            self.command_loop = 0
-            
-        ### Execute commands
-        if self.command_current == 'left':
-            self.direction.x = -1
-            self.facing = 'left'
-        elif self.command_current == 'right':
-            self.direction.x = 1
-            self.facing = 'right'
-        else:
-            self.direction.x = 0
-            
-        if self.command_current == 'up':
-            self.direction.y = -1
-            self.facing = 'up'
-        elif self.command_current == 'down':
-            self.direction.y = 1
-            self.facing = 'down'
-        else:
-            self.direction.y = 0   
+            if self.command_loop < self.command_length:
+                self.command_loop += 1
+            ## If current command has ended, pick a new command
+            else:
+                self.command_current = random.choice(available_commands)
+                self.command_length = random.randint(command_length_min, command_length_max)
+                self.command_loop = 0
+                
+            ### Execute commands                
+            if self.command_current == 'attack':
+                self.attack()
+            if self.command_current == 'left':
+                self.direction.x = -1
+                self.facing = 'left'
+            elif self.command_current == 'right':
+                self.direction.x = 1
+                self.facing = 'right'
+            else:
+                self.direction.x = 0
+                
+            if self.command_current == 'up':
+                self.direction.y = -1
+                self.facing = 'up'
+            elif self.command_current == 'down':
+                self.direction.y = 1
+                self.facing = 'down'
+            else:
+                self.direction.y = 0   
         
 class Villager(Non_Player):
     def __init__(self, level, x, y):        

@@ -5,7 +5,7 @@ Created on Sat Mar 18 19:45:24 2023
 @author: Huge Mstr
 """
 
-# import sys
+import sys
 import pygame
 from gui import *
 from sprites import Spritesheet

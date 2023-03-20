@@ -67,9 +67,31 @@ class Sprite(pygame.sprite.Sprite):
         self.rect = self.animations[0].get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
+        
+    def load_animations_directional(self, x_start, y_start):
+        ## Load animations
+        self.down_animations = []
+        self.up_animations = []
+        self.right_animations = []
+        self.left_animations = []
+        
+        ## Requires the order to be DOWN, UP, RIGHT, LEFT
+        for frame in range(self.animation_num_of_frames):
+            self.down_animations.append( self.spritesheet.get_sprite(x_start + (self.width * frame), y_start,                     self.width, self.height))
+            self.up_animations.append(   self.spritesheet.get_sprite(x_start + (self.width * frame), y_start +  self.height,      self.width, self.height))
+            self.right_animations.append(self.spritesheet.get_sprite(x_start + (self.width * frame), y_start + (self.height * 2), self.width, self.height))
+            self.left_animations.append( self.spritesheet.get_sprite(x_start + (self.width * frame), y_start + (self.height * 3), self.width, self.height))
+        
+        ## Load collision box
+        self.image = self.down_animations[0]
+        self.rect = self.down_animations[0].get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
                     
     def animate(self):
         self.image = self.animations[math.floor(self.animation_loop)]
         self.animation_loop += self.animation_speed_base * self.speed
         if self.animation_loop >= len(self.animations):
             self.animation_loop = 1
+            

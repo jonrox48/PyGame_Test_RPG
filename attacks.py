@@ -12,102 +12,81 @@ import math
 import random
 
 class Attack(Sprite):
-    def __init__(self, level, x, y, layer):
-        super().__init__(level, x, y)
+    def __init__(self, character, x, y):
+        super().__init__(character.level, x, y)
         ####################################################################
-        ########################## CONFIGURATION ###########################
+        ########################## LOGISTICS ###############################
         ####################################################################
-        # ## Define which game object it is a part ot
-        # self.level = level
-        
         ## Define which layer this sprite should be drawn in 
-        self._layer = layer
-        
+        self._layer = character._layer
         ## Define which groups this sprite should be a part of 
         self.groups.append(self.level.attacks)
         ## Initialize inherited pygame Sprite Class
-        pygame.sprite.Sprite.__init__(self, self.groups)
+        pygame.sprite.Sprite.__init__(self, tuple(self.groups))
+        self.character = character
+        self.character.attacking = True
         
-        ## Sprite Dimensions
-        self.width = TILE_SIZE
-        self.height = TILE_SIZE
-        
-        ## Sprite Image
-        self.image = self.level.attack_spritesheet.get_sprite(0, 0, self.width, self.height)
-
         #######################################################################
         ########################## STATUS #####################################
         #######################################################################
-        # 2 total animations
-        self.animation_loop = 0
-        
-        ## Current Location
+        ## Current Location (CURRENTLY THIS IS BEING PASSED BY THE CHARACTER OBJ, SO ITS ALREADY IN PIXELS, NO NEED TO MULTIPLY BY TILE_SIZE)
+        self.facing = self.character.facing
         self.x = x
         self.y = y
-        
-        ## Current collision box
-        self.rect = self.image.get_rect()
-        self.rect.x = self.x
-        self.rect.y = self.y
-        
         #######################################################################
         ########################## ANIMATIONS #####################################
         #######################################################################
-        self.right_animations = [self.level.attack_spritesheet.get_sprite(0, 64, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(32, 64, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(64, 64, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(96, 64, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(128, 64, self.width, self.height)]
-
-        self.down_animations = [self.level.attack_spritesheet.get_sprite(0, 32, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(32, 32, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(64, 32, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(96, 32, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(128, 32, self.width, self.height)]
-
-        self.left_animations = [self.level.attack_spritesheet.get_sprite(0, 96, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(32, 96, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(64, 96, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(96, 96, self.width, self.height),
-                           self.level.attack_spritesheet.get_sprite(128, 96, self.width, self.height)]
-
-        self.up_animations = [self.level.attack_spritesheet.get_sprite(0, 0, self.width, self.height),
-                         self.level.attack_spritesheet.get_sprite(32, 0, self.width, self.height),
-                         self.level.attack_spritesheet.get_sprite(64, 0, self.width, self.height),
-                         self.level.attack_spritesheet.get_sprite(96, 0, self.width, self.height),
-                         self.level.attack_spritesheet.get_sprite(128, 0, self.width, self.height)]
+        ## Sprite Image
+        self.spritesheet = self.level.attack_spritesheet
+        pixel_x_start = 0
+        pixel_y_start = 0
+        self.animation_num_of_frames = 5
+        self.animation_loop = 0
+        self.speed = 17
+        self.load_animations_directional(pixel_x_start, pixel_y_start)
 
         
     def update(self):
+        self.collide()        
         self.animate()
-        self.collide()
         
     def collide(self):
-        hits = pygame.sprite.spritecollide(self, self.level.non_player, True)
+        if self.character in self.level.player_group.sprites():
+            pygame.sprite.spritecollide(self, self.level.non_player, True)
+        elif self.character in self.level.enemies.sprites():
+            pygame.sprite.spritecollide(self, self.level.villagers, True)
+        elif self.character in self.level.villagers.sprites():
+            pygame.sprite.spritecollide(self, self.level.enemies, True)
         
     def animate(self):
-        direction = self.level.player.facing
-        
-        if direction == 'up':
-            self.image = self.up_animations[math.floor(self.animation_loop)]
-            self.animation_loop += 0.5
-            if self.animation_loop >= 5:
-                self.kill()
-                
-        if direction == 'down':
+        if self.facing == "down":
             self.image = self.down_animations[math.floor(self.animation_loop)]
-            self.animation_loop += 0.5
-            if self.animation_loop >= 5:
+            self.animation_loop += self.animation_speed_base*self.speed
+            if self.animation_loop >= len(self.down_animations):
+                self.character.attacking = False                
                 self.kill()
-                
-        if direction == 'left':
+
+                    
+        if self.facing == "up":
+            self.image = self.up_animations[math.floor(self.animation_loop)]
+            self.animation_loop += self.animation_speed_base*self.speed
+            if self.animation_loop >= len(self.up_animations):
+                self.character.attacking = False                
+                self.kill()
+
+        
+        if self.facing == "left":
             self.image = self.left_animations[math.floor(self.animation_loop)]
-            self.animation_loop += 0.5
-            if self.animation_loop >= 5:
+            self.animation_loop += self.animation_speed_base*self.speed
+            if self.animation_loop >= len(self.left_animations):
+                self.character.attacking = False                
                 self.kill()
-                
-        if direction == 'right':
+
+                    
+        if self.facing == "right":
             self.image = self.right_animations[math.floor(self.animation_loop)]
-            self.animation_loop += 0.5
-            if self.animation_loop >= 5:
+            self.animation_loop += self.animation_speed_base*self.speed
+            if self.animation_loop >= len(self.right_animations):
+                self.character.attacking = False                
                 self.kill()
+
