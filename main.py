@@ -28,10 +28,10 @@ class Game:
         self.font = pygame.font.Font('fonts/ARIAL.TTF', 32)
         self.running = True
         self.playing = False
-        self.event_list = []
         
-        self.level = Level(self) 
-         
+        self.level = Level(self)
+
+        
         self.intro_background = pygame.image.load('img/introbackground.png')
         self.go_background = pygame.image.load('img/gameover.png')
 
@@ -89,13 +89,12 @@ class Game:
 ####################################################################
     def run(self):
         while self.running:
-            # self.events_list = pygame.event.get()
-            for event in self.event_list:
+            for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit() 
+                    pygame.quit()
                     sys.exit()
             self.screen.fill(BLACK)                    
-            self.level.run()           
+            self.level.run()        
             # self.events()
             pygame.display.update()
             self.clock.tick(FPS)

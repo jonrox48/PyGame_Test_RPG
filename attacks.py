@@ -12,8 +12,7 @@ import math
 import random
 
 class Attack(Sprite):
-    def __init__(self, level, x, y):      
-        super().__init__(level, x, y) 
+    def __init__(self, level, x, y):        
         ####################################################################
         ########################## CONFIGURATION ###########################
         ####################################################################
