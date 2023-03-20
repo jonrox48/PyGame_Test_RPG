@@ -67,6 +67,12 @@ class Level():
 
         
     def update(self):
+        self.game.event_list = pygame.event.get()
+        for ind, event in enumerate(self.game.event_list):
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
         self.all_sprites.update()
         
     def draw(self):

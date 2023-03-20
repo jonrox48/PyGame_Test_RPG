@@ -225,7 +225,7 @@ class Player(Character):
         #######################################################################
         ####################### SINGLE BUTTON PRESSES #########################
         ####################################################################### 
-        for event in pygame.event.get():
+        for event in self.level.game.event_list:
             if event.type == pygame.KEYDOWN:
                 ## Basic attack
                 if event.key == pygame.K_SPACE:

@@ -29,103 +29,24 @@ class Game:
         self.running = True
         self.playing = False
         
+        self.event_list = []
+        
         self.level = Level(self)
 
         
         self.intro_background = pygame.image.load('img/introbackground.png')
         self.go_background = pygame.image.load('img/gameover.png')
 
-
-
-                
-
-####################################################################
-########################## STARTING NEW GAME #######################
-####################################################################
-    # def new(self):
-    #     # a new game starts
-    #     s
-    #     # ## All
-    #     # self.all_sprites = pygame.sprite.LayeredUpdates()
-        
-    #     # ## High level groups
-    #     # self.characters = pygame.sprite.LayeredUpdates()
-    #     # self.player_group = pygame.sprite.LayeredUpdates()
-    #     # self.non_player = pygame.sprite.LayeredUpdates()        
-        
-    #     # ## Friendlies
-    #     # self.villagers = pygame.sprite.LayeredUpdates()
-        
-    #     # ## Enemies
-    #     # self.enemies = pygame.sprite.LayeredUpdates()
-    #     # self.zombies = pygame.sprite.LayeredUpdates()
-        
-    #     # ## Terrain Indestructable
-    #     # self.collision_blocks = pygame.sprite.LayeredUpdates()
-    #     # self.non_collision_blocks = pygame.sprite.LayeredUpdates() 
-        
-    #     # ## Terrain Destructable
-        
-    #     # ## Attacks
-    #     # self.attacks = pygame.sprite.LayeredUpdates()
-        
-    #     # self.createTilemap()
-        
-    # # def createTilemap(self):
-    # #     for i, row in enumerate(tilemap):
-    # #         for j, column in enumerate(row):
-    # #             Grass(self, j, i)
-    # #             if column == "B":
-    # #                 Rock(self, j, i)
-    # #             elif column == "E":
-    # #                 Zombie(self, j, i)
-    # #             elif column == "N":
-    # #                 Villager(self, j, i)
-    # #             elif column == "P":
-    # #                 self.player = Player(self, j, i)
         
 ####################################################################
 ########################## RUNNING THE GAME ########################
 ####################################################################
     def run(self):
         while self.running:
-            self.events()
-            for event in self.event_list:
-                if event.type == pygame.QUIT:
-                    self.playing = False
-                    self.running = False
             self.screen.fill(BLACK)                    
             self.level.run()           
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-            self.screen.fill(BLACK)                    
-            self.level.run()        
-            # self.events()
             pygame.display.update()
             self.clock.tick(FPS)
-        pygame.quit()
-        sys.exit()
-        
-    def events(self):
-        ## Game Level Actions
-        self.event_list = pygame.event.get()
-        # for event in self.events_list:
-        #     if event.type == pygame.QUIT:
-                
-        #         self.playing = False
-        #         self.running = False
-        
-    # ## Every Sprite must have an update method
-    # def update(self):
-    #     self.all_sprites.update()
-        
-    # def draw(self):
-    #     self.screen.fill(BLACK)
-    #     self.all_sprites.draw(self.screen)
-    #     self.clock.tick(FPS)
-    #     pygame.display.update()
     
 
 ####################################################################
@@ -141,7 +62,8 @@ class Game:
         play_button = Button(10, 50, 100, 50, WHITE, BLACK, "Play", 32)
         
         while intro:
-            for event in pygame.event.get():
+            self.event_list = pygame.event.get()
+            for event in self.event_list:
                 if event.type == pygame.QUIT:
                     intro = False
                     self.running = False
@@ -168,9 +90,9 @@ class Game:
         restart_button = Button(10, WIN_HEIGHT - 60, 120, 50, WHITE, BLACK, 'Restart', 32)
         
         restart = False
-        
         while not restart:
-            for event in pygame.event.get():
+            self.event_list = pygame.event.get()
+            for event in self.event_list:
                 if event.type == pygame.QUIT:
                     self.running = False
                     
