@@ -89,6 +89,13 @@ class Game:
 ####################################################################
     def run(self):
         while self.running:
+            self.events()
+            for event in self.event_list:
+                if event.type == pygame.QUIT:
+                    self.playing = False
+                    self.running = False
+            self.screen.fill(BLACK)                    
+            self.level.run()           
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -98,19 +105,17 @@ class Game:
             # self.events()
             pygame.display.update()
             self.clock.tick(FPS)
-            # self.update()
-            # self.draw()
         pygame.quit()
         sys.exit()
         
     def events(self):
         ## Game Level Actions
-        self.events_list = pygame.event.get()
-        for event in self.events_list:
-            if event.type == pygame.QUIT:
+        self.event_list = pygame.event.get()
+        # for event in self.events_list:
+        #     if event.type == pygame.QUIT:
                 
-                self.playing = False
-                self.running = False
+        #         self.playing = False
+        #         self.running = False
         
     # ## Every Sprite must have an update method
     # def update(self):
@@ -140,6 +145,8 @@ class Game:
                 if event.type == pygame.QUIT:
                     intro = False
                     self.running = False
+                    pygame.quit()
+                    sys.exit()
             mouse_pos = pygame.mouse.get_pos()
             mouse_pressed = pygame.mouse.get_pressed()
             
@@ -160,8 +167,9 @@ class Game:
         
         restart_button = Button(10, WIN_HEIGHT - 60, 120, 50, WHITE, BLACK, 'Restart', 32)
         
+        restart = False
         
-        while self.running:
+        while not restart:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
@@ -170,7 +178,8 @@ class Game:
             mouse_pressed = pygame.mouse.get_pressed()
             
             if restart_button.is_pressed(mouse_pos, mouse_pressed):
-                self.level = Level(self)
+                # self.level = Level(self)
+                restart = True
                 # self.main()
                 
             self.screen.blit(self.go_background, (0,0))
@@ -185,12 +194,13 @@ class Game:
 ####################################################################
 if __name__ == '__main__':
     g = Game()
-    g.intro_screen()
-    # g.new()
-    # while g.running:
-    g.run()
-        # g.game_over()
-        
-    # pygame.quit()
-    # sys.exit()
+    while g.running:
+        g.intro_screen()
+        # g.new()
+        while g.playing:
+            g.run()
+        g.game_over()
+            
+        # pygame.quit()
+        # sys.exit()
 
