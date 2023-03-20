@@ -12,19 +12,19 @@ import math
 import random
 
 class Attack(Sprite):
-    def __init__(self, level, x, y):        
+    def __init__(self, level, x, y, layer):
+        super().__init__(level, x, y)
         ####################################################################
         ########################## CONFIGURATION ###########################
         ####################################################################
-        ## Define which game object it is a part ot
-        self.level = level
+        # ## Define which game object it is a part ot
+        # self.level = level
         
         ## Define which layer this sprite should be drawn in 
-        self._layer = PLAYER_LAYER
+        self._layer = layer
         
         ## Define which groups this sprite should be a part of 
-        self.groups = self.level.all_sprites, self.level.attacks
-        
+        self.groups.append(self.level.attacks)
         ## Initialize inherited pygame Sprite Class
         pygame.sprite.Sprite.__init__(self, self.groups)
         

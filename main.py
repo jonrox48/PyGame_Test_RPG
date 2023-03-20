@@ -31,20 +31,30 @@ class Game:
         
         self.event_list = []
         
-        self.level = Level(self)
-
+        # self.level = Level(self)
         
         self.intro_background = pygame.image.load('img/introbackground.png')
         self.go_background = pygame.image.load('img/gameover.png')
 
+####################################################################
+########################## START NEW GAME ##########################
+####################################################################
+    def new(self):
+       self.level = Level(self)
+       
+####################################################################
+##################### DELETE CURRENT GAME ##########################
+####################################################################\
+    def delete(self):
+        del self.level
         
 ####################################################################
 ########################## RUNNING THE GAME ########################
 ####################################################################
     def run(self):
-        while self.running:
+        while self.playing:
             self.screen.fill(BLACK)                    
-            self.level.run()           
+            self.level.run()
             pygame.display.update()
             self.clock.tick(FPS)
     
@@ -67,14 +77,15 @@ class Game:
                 if event.type == pygame.QUIT:
                     intro = False
                     self.running = False
-                    pygame.quit()
-                    sys.exit()
+                    # pygame.quit()
+                    # sys.exit()
             mouse_pos = pygame.mouse.get_pos()
             mouse_pressed = pygame.mouse.get_pressed()
             
             if play_button.is_pressed(mouse_pos, mouse_pressed):
                 intro = False
                 self.playing = True
+                self.new()
                 
             self.screen.blit(self.intro_background, (0,0))
             self.screen.blit(title, title_rect)
@@ -89,20 +100,20 @@ class Game:
         
         restart_button = Button(10, WIN_HEIGHT - 60, 120, 50, WHITE, BLACK, 'Restart', 32)
         
-        restart = False
-        while not restart:
+        loop = True
+        while loop:
             self.event_list = pygame.event.get()
             for event in self.event_list:
                 if event.type == pygame.QUIT:
                     self.running = False
+                    loop = False
                     
             mouse_pos = pygame.mouse.get_pos()
             mouse_pressed = pygame.mouse.get_pressed()
             
             if restart_button.is_pressed(mouse_pos, mouse_pressed):
-                # self.level = Level(self)
-                restart = True
-                # self.main()
+                self.delete()
+                loop = False
                 
             self.screen.blit(self.go_background, (0,0))
             self.screen.blit(text, text_rect)
@@ -122,7 +133,7 @@ if __name__ == '__main__':
         while g.playing:
             g.run()
         g.game_over()
-            
-        # pygame.quit()
-        # sys.exit()
+    pygame.quit()
+    sys.exit()
+
 

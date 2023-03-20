@@ -62,7 +62,7 @@ class Level():
                     self.player = Player(self, j, i)
 
     def run(self):
-        self.draw()        
+        self.draw()
         self.update()
 
         

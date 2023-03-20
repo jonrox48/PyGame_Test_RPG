@@ -186,22 +186,17 @@ class Player(Character):
             if hits:
                 ## Right now if we collide with an enemy, we die immediately, someday, we will want to add health #TODO
                 self.kill()
-                self.level.game.running = False
+                self.level.game.playing = False
         if direction == 'y':
             if hits:
                 ## Right now if we collide with an enemy, we die immediately, someday, we will want to add health #TODO
                 self.kill()
-                self.level.game.running = False
+                self.level.game.playing = False
                     
     def inputs(self):
         #######################################################################
         ####################### BUTTONS THAT ARE HELD #########################
         ####################################################################### 
-        for event in self.level.game.event_list: #self.level.game.event_list:
-            if event.type == pygame.KEYDOWN:
-                ## Basic attack
-                if event.key == pygame.K_SPACE:
-                    debug("Space")
         keys = pygame.key.get_pressed()
         ## Movement
         if keys[pygame.K_LEFT]:
@@ -230,13 +225,13 @@ class Player(Character):
                 ## Basic attack
                 if event.key == pygame.K_SPACE:
                     if self.facing == 'up':
-                        Attack(self.level, self.rect.x, self.rect.y - TILE_SIZE)
+                        Attack(self.level, self.rect.x, self.rect.y - TILE_SIZE, self._layer)
                     if self.facing == 'down':
-                        Attack(self.level, self.rect.x, self.rect.y + TILE_SIZE)
+                        Attack(self.level, self.rect.x, self.rect.y + TILE_SIZE, self._layer)
                     if self.facing == 'left':
-                        Attack(self.level, self.rect.x - TILE_SIZE, self.rect.y)
+                        Attack(self.level, self.rect.x - TILE_SIZE, self.rect.y, self._layer)
                     if self.facing == 'right':
-                        Attack(self.level, self.rect.x + TILE_SIZE, self.rect.y)
+                        Attack(self.level, self.rect.x + TILE_SIZE, self.rect.y, self._layer)
                         
     def move(self, speed):
         x_movement = self.direction.x * speed
@@ -346,9 +341,6 @@ class Non_Player(Character):
         else:
             self.direction.y = 0   
         
-  
-
-
 class Villager(Non_Player):
     def __init__(self, level, x, y):        
         #######################################################################
