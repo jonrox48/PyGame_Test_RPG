@@ -170,16 +170,21 @@ class Player(Character):
         ## Check for any collisions with the enemies group
         hits = pygame.sprite.spritecollide(self, self.level.enemies, False)
         ## Do we need to break into x and y? #TODO
+        
         if direction == 'x':
-            if hits:
-                ## Right now if we collide with an enemy, we die immediately, someday, we will want to add health #TODO
-                self.kill()
-                self.level.game.playing = False
+            for sprite in self.level.enemies:
+                if sprite.hitbox.colliderect(self.hitbox):
+            # if hits:
+            #     ## Right now if we collide with an enemy, we die immediately, someday, we will want to add health #TODO
+                    self.kill()
+                    self.level.game.playing = False
         if direction == 'y':
-            if hits:
+            # if hits:
+            for sprite in self.level.enemies:
+                if sprite.hitbox.colliderect(self.hitbox):
                 ## Right now if we collide with an enemy, we die immediately, someday, we will want to add health #TODO
-                self.kill()
-                self.level.game.playing = False
+                    self.kill()
+                    self.level.game.playing = False
                     
     def inputs(self):
         #######################################################################
