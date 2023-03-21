@@ -26,6 +26,9 @@ class Attack(Sprite):
         self.character = character
         self.character.attacking = True
         
+        self.name = 'attack'
+        self.character.keylist.append(self.name)
+        
         #######################################################################
         ########################## STATUS #####################################
         #######################################################################
@@ -63,7 +66,8 @@ class Attack(Sprite):
             self.image = self.down_animations[math.floor(self.animation_loop)]
             self.animation_loop += self.animation_speed_base*self.speed
             if self.animation_loop >= len(self.down_animations):
-                self.character.attacking = False                
+                self.character.attacking = False       
+                self.character.keylist.remove(self.name)
                 self.kill()
 
                     
@@ -71,7 +75,8 @@ class Attack(Sprite):
             self.image = self.up_animations[math.floor(self.animation_loop)]
             self.animation_loop += self.animation_speed_base*self.speed
             if self.animation_loop >= len(self.up_animations):
-                self.character.attacking = False                
+                self.character.attacking = False  
+                self.character.keylist.remove(self.name)
                 self.kill()
 
         
@@ -79,7 +84,8 @@ class Attack(Sprite):
             self.image = self.left_animations[math.floor(self.animation_loop)]
             self.animation_loop += self.animation_speed_base*self.speed
             if self.animation_loop >= len(self.left_animations):
-                self.character.attacking = False                
+                self.character.attacking = False          
+                self.character.keylist.remove(self.name)
                 self.kill()
 
                     
@@ -87,6 +93,7 @@ class Attack(Sprite):
             self.image = self.right_animations[math.floor(self.animation_loop)]
             self.animation_loop += self.animation_speed_base*self.speed
             if self.animation_loop >= len(self.right_animations):
-                self.character.attacking = False                
+                self.character.attacking = False    
+                self.character.keylist.remove(self.name)
                 self.kill()
 

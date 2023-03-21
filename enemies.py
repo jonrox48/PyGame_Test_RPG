@@ -44,5 +44,5 @@ class Zombie(Enemy):
         self.spritesheet = self.level.non_player_spritesheet
         pixel_x_start = 3
         pixel_y_start = 2
-        self.load_animations(pixel_x_start, pixel_y_start)
+        self.load_animations_directional(pixel_x_start, pixel_y_start)
         

@@ -32,26 +32,7 @@ class Character(Sprite):
         self.facing = 'down'
         self.direction = pygame.math.Vector2()
         self.attacking = False
-        
-        
-    def load_animations(self, x_start, y_start):
-        ## Load animations
-        self.down_animations = []
-        self.up_animations = []
-        self.right_animations = []
-        self.left_animations = []
-        
-        for frame in range(self.animation_num_of_frames):
-            self.down_animations.append( self.spritesheet.get_sprite(x_start + (self.width * frame), y_start,                     self.width, self.height))
-            self.up_animations.append(   self.spritesheet.get_sprite(x_start + (self.width * frame), y_start +  self.height,      self.width, self.height))
-            self.right_animations.append(self.spritesheet.get_sprite(x_start + (self.width * frame), y_start + (self.height * 2), self.width, self.height))
-            self.left_animations.append( self.spritesheet.get_sprite(x_start + (self.width * frame), y_start + (self.height * 3), self.width, self.height))
-        
-        ## Load collision box
-        self.image = self.down_animations[0]
-        self.rect = self.down_animations[0].get_rect()
-        self.rect.x = self.x
-        self.rect.y = self.y
+        self.keylist = []
         
     def collide_blocks(self, direction):
         if direction == 'x':
@@ -129,28 +110,20 @@ class Character(Sprite):
             self.direction.y = 0
         
     def move(self, speed):
+        if self.direction.magnitude() != 0:
+            self.direction = self.direction.normalize()
+            
         x_movement = self.direction.x * speed
         y_movement = self.direction.y * speed
         
         self.rect.x += x_movement
         if self.collide_blocks('x'):
             self.rect.x -= x_movement
-            x_movement = 0
-        else:
-            if x_movement > 0:
-                self.facing = 'right'
-            elif x_movement < 0:
-                self.facing = 'left'
-                
+            x_movement = 0                
         self.rect.y += y_movement
         if self.collide_blocks('y'):
             self.rect.y -= y_movement
-            y_movement = 0
-        else:
-            if y_movement > 0:
-                self.facing = 'down'
-            elif y_movement < 0:
-                self.facing = 'up'     
+            y_movement = 0 
 
 class Player(Character):
     def __init__(self, level, x, y):
@@ -178,7 +151,7 @@ class Player(Character):
         ## Where in the spritesheet is the top left corner of the first sprite?
         pixel_x_start = 3
         pixel_y_start = 2
-        self.load_animations(pixel_x_start, pixel_y_start)
+        self.load_animations_directional(pixel_x_start, pixel_y_start)
   
     def update(self):
         #######################################################################
@@ -191,7 +164,6 @@ class Player(Character):
         self.collide_enemies_character('x')
         self.collide_enemies_character('y')
 
-    
     def collide_enemies_character(self, direction):  
         ## Check for any collisions with the enemies group
         hits = pygame.sprite.spritecollide(self, self.level.enemies, False)
@@ -207,16 +179,30 @@ class Player(Character):
                 self.kill()
                 self.level.game.playing = False
                     
-    
     def inputs(self):
         #######################################################################
         ####################### SINGLE BUTTON PRESSES #########################
-        ####################################################################### 
+        #######################################################################
         for event in self.level.game.event_list:
             if event.type == pygame.KEYDOWN:
                 ## Basic attack
                 if event.key == pygame.K_SPACE:
-                    self.attack()                        
+                    self.attack()
+                        
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT:
+                    self.direction.x = 0
+                    self.keylist.remove('left')
+                if event.key == pygame.K_RIGHT:
+                    self.direction.x = 0
+                    self.keylist.remove('right')
+                if event.key == pygame.K_UP:
+                    self.direction.y = 0
+                    self.keylist.remove('up')
+                if event.key == pygame.K_DOWN:
+                    self.direction.y = 0
+                    self.keylist.remove('down')
+                    
         if not self.attacking:
             #######################################################################
             ####################### BUTTONS THAT ARE HELD #########################
@@ -225,23 +211,30 @@ class Player(Character):
             ## Movement
             if keys[pygame.K_LEFT]:
                 self.direction.x = -1
-                # self.facing = 'left'
-            elif keys[pygame.K_RIGHT]:
+                if 'left' not in self.keylist:
+                    self.keylist.append('left')
+            if keys[pygame.K_RIGHT]:
                 self.direction.x = 1
-                # self.facing = 'right'
-            else:
-                self.direction.x = 0
-                
+                if 'right' not in self.keylist:
+                    self.keylist.append('right')
             if keys[pygame.K_UP]:
                 self.direction.y = -1
-                # self.facing = 'up'
-            elif keys[pygame.K_DOWN]:
+                if 'up' not in self.keylist:
+                    self.keylist.append('up')
+            if keys[pygame.K_DOWN]:
                 self.direction.y = 1
-                # self.facing = 'down'
-            else:
-                self.direction.y = 0            
-                        
+                if 'down' not in self.keylist:
+                    self.keylist.append('down')
+                
+        if len(self.keylist) > 0:
+            self.facing = self.keylist[-1]
+                
     def move(self, speed):
+        # if self.direction.magnitude() != 0:
+        #     self.direction = self.direction.normalize()
+        #     debug(self.direction.x)
+        #     debug(self.direction.y)
+
         x_movement = self.direction.x * speed
         y_movement = self.direction.y * speed
         
@@ -249,21 +242,10 @@ class Player(Character):
         if self.collide_blocks('x'):
             self.rect.x -= x_movement
             x_movement = 0
-        else:
-            if x_movement > 0:
-                self.facing = 'right'
-            elif x_movement < 0:
-                self.facing = 'left'
-                
         self.rect.y += y_movement
         if self.collide_blocks('y'):
             self.rect.y -= y_movement
             y_movement = 0
-        else:
-            if y_movement > 0:
-                self.facing = 'down'
-            elif y_movement < 0:
-                self.facing = 'up'     
                 
         #######################################################################
         ####################### CAMERA FOLLOWING PLAYER #######################
@@ -271,6 +253,8 @@ class Player(Character):
         for sprite in self.level.all_sprites:
             sprite.rect.x -= x_movement
             sprite.rect.y -= y_movement
+            
+            
             
 ## Purely Parent Class. No loading animations
 class Non_Player(Character):
@@ -326,30 +310,33 @@ class Non_Player(Character):
                 self.command_loop += 1
             ## If current command has ended, pick a new command
             else:
-                self.command_current = random.choice(available_commands)
+                self.command_current = self.command_current[:-1]
+                self.command_current.append(random.choice(available_commands))
                 self.command_length = random.randint(command_length_min, command_length_max)
                 self.command_loop = 0
                 
             ### Execute commands                
-            if self.command_current == 'attack':
+            if 'attack' in self.command_current:
                 self.attack()
-            if self.command_current == 'left':
+                self.command_current.remove('attack')
+                
+            if 'left' in self.command_current:
                 self.direction.x = -1
-                self.facing = 'left'
-            elif self.command_current == 'right':
+            elif 'right' in self.command_current:
                 self.direction.x = 1
-                self.facing = 'right'
             else:
                 self.direction.x = 0
                 
-            if self.command_current == 'up':
+            if 'up' in self.command_current:
                 self.direction.y = -1
-                self.facing = 'up'
-            elif self.command_current == 'down':
+            elif 'down' in self.command_current:
                 self.direction.y = 1
-                self.facing = 'down'
             else:
                 self.direction.y = 0   
+            
+            if len(self.command_current) > 0:
+                if self.command_current[-1] is 'up' or 'down' or 'left' or 'right':
+                    self.facing = self.command_current[-1]
         
 class Villager(Non_Player):
     def __init__(self, level, x, y):        
@@ -374,4 +361,4 @@ class Villager(Non_Player):
         self.spritesheet = self.level.character_spritesheet
         pixel_x_start = 3
         pixel_y_start = 2        
-        self.load_animations(pixel_x_start, pixel_y_start)
+        self.load_animations_directional(pixel_x_start, pixel_y_start)

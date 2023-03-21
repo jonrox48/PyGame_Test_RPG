@@ -31,8 +31,6 @@ class Game:
         
         self.event_list = []
         
-        # self.level = Level(self)
-        
         self.intro_background = pygame.image.load('img/introbackground.png')
         self.go_background = pygame.image.load('img/gameover.png')
 
