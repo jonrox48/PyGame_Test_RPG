@@ -230,13 +230,18 @@ class Player(Character):
             self.facing = self.keylist[-1]
                 
     def move(self, speed):
-        # if self.direction.magnitude() != 0:
-        #     self.direction = self.direction.normalize()
+        if self.direction.magnitude() != 0:
+            self.direction = self.direction.normalize()
+            
         #     debug(self.direction.x)
         #     debug(self.direction.y)
-
+        
+        
+        
         x_movement = self.direction.x * speed
         y_movement = self.direction.y * speed
+        
+        # self.rect.center += self.direction * speed
         
         self.rect.x += x_movement
         if self.collide_blocks('x'):
@@ -250,6 +255,8 @@ class Player(Character):
         #######################################################################
         ####################### CAMERA FOLLOWING PLAYER #######################
         ####################################################################### 
+        debug(self.direction.y * speed)
+        debug(y_movement, 40, 10)
         for sprite in self.level.all_sprites:
             sprite.rect.x -= x_movement
             sprite.rect.y -= y_movement
