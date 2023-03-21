@@ -24,6 +24,8 @@ class Character(Sprite):
         super().__init__(level, x, y)     
         ## Define which groups this sprite should be a part of
         self.groups.append(self.level.characters)
+        self.x_overlap_offset = 0
+        self.y_overlap_offset = -30
         
         #######################################################################
         ########################## STATUS #####################################
@@ -34,25 +36,26 @@ class Character(Sprite):
         self.attacking = False
         self.keylist = []
         
+        
     def collide_blocks(self, direction):
         if direction == 'x':
-            hits = pygame.sprite.spritecollide(self, self.level.collision_blocks, False)
-            if hits:
-                self.direction.x = 0                
-                if self.direction.x > 0:
-                    self.rect.x = hits[0].rect.left - self.rect.width
-                if self.direction.x < 0:
-                    self.rect.x = hits[0].rect.right
-                return True
+            for sprite in self.level.collision_blocks:
+                if sprite.hitbox.colliderect(self.hitbox):
+                    if self.direction.x > 0: # moving right
+                        self.hitbox.right = sprite.hitbox.left
+                    if self.direction.x < 0: # moving left
+                        self.hitbox.left = sprite.hitbox.right
+                    self.direction.x = 0                        
+                    return True
         if direction == 'y':
-            hits = pygame.sprite.spritecollide(self, self.level.collision_blocks, False)
-            if hits:
-                self.direction.y = 0
-                if self.direction.y > 0:
-                    self.rect.y = hits[0].rect.top - self.rect.height
-                if self.direction.y < 0:
-                    self.rect.y = hits[0].rect.bottom
-                return True
+            for sprite in self.level.collision_blocks:
+                if sprite.hitbox.colliderect(self.hitbox):
+                    if self.direction.y > 0: # moving down
+                        self.hitbox.bottom = sprite.hitbox.top
+                    if self.direction.y < 0: # moving up
+                        self.hitbox.top = sprite.hitbox.bottom
+                    self.direction.y = 0                        
+                    return True
                     
     def animate(self):
         if self.facing == "down":
@@ -116,14 +119,13 @@ class Character(Sprite):
         x_movement = self.direction.x * speed
         y_movement = self.direction.y * speed
         
-        self.rect.x += x_movement
-        if self.collide_blocks('x'):
-            self.rect.x -= x_movement
-            x_movement = 0                
-        self.rect.y += y_movement
-        if self.collide_blocks('y'):
-            self.rect.y -= y_movement
-            y_movement = 0 
+        self.hitbox.x += x_movement
+        self.collide_blocks('x')
+        self.hitbox.y += y_movement
+        self.collide_blocks('y')
+            
+        self.rect.centerx = self.hitbox.centerx
+        self.rect.centery = self.hitbox.centery
 
 class Player(Character):
     def __init__(self, level, x, y):
@@ -228,39 +230,6 @@ class Player(Character):
                 
         if len(self.keylist) > 0:
             self.facing = self.keylist[-1]
-                
-    def move(self, speed):
-        if self.direction.magnitude() != 0:
-            self.direction = self.direction.normalize()
-            
-        #     debug(self.direction.x)
-        #     debug(self.direction.y)
-        
-        
-        
-        x_movement = self.direction.x * speed
-        y_movement = self.direction.y * speed
-        
-        # self.rect.center += self.direction * speed
-        
-        self.rect.x += x_movement
-        if self.collide_blocks('x'):
-            self.rect.x -= x_movement
-            x_movement = 0
-        self.rect.y += y_movement
-        if self.collide_blocks('y'):
-            self.rect.y -= y_movement
-            y_movement = 0
-                
-        #######################################################################
-        ####################### CAMERA FOLLOWING PLAYER #######################
-        ####################################################################### 
-        debug(self.direction.y * speed)
-        debug(y_movement, 40, 10)
-        for sprite in self.level.all_sprites:
-            sprite.rect.x -= x_movement
-            sprite.rect.y -= y_movement
-            
             
             
 ## Purely Parent Class. No loading animations

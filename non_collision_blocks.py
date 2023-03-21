@@ -31,7 +31,7 @@ class Grass(Non_Collision_Block):
         ## Inherit from Non_Collision_Block class
         super().__init__(level, x, y)        
         ## Initialize inherited pygame Sprite Class
-        pygame.sprite.Sprite.__init__(self, self.groups)
+        pygame.sprite.Sprite.__init__(self, tuple(self.groups))
         
         #######################################################################
         ########################## SPRITE #####################################

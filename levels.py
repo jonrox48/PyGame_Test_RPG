@@ -22,7 +22,7 @@ class Level():
         self.display_surface = pygame.display.get_surface()
         ## All
         self.game = game
-        self.all_sprites = pygame.sprite.LayeredUpdates()
+        self.all_sprites = YSortCameraGroup()
         ## High level groups
         self.characters = pygame.sprite.LayeredUpdates()
         self.player_group = pygame.sprite.LayeredUpdates()
@@ -62,8 +62,9 @@ class Level():
                     self.player = Player(self, j, i)
 
     def run(self):
-        self.draw()
         self.update()
+        self.draw()
+ 
 
         
     def update(self):
@@ -77,6 +78,25 @@ class Level():
         
     def draw(self):
         # self.display_surface.fill(BLACK)
-        self.all_sprites.draw(self.display_surface)
+        self.all_sprites.custom_draw(self.player)
         # self.clock.tick(FPS)
         pygame.display.update()
+        
+class YSortCameraGroup(pygame.sprite.Group):
+    def __init__(self):
+        # general setup
+        super().__init__()
+        self.display_surface = pygame.display.get_surface()
+        self.half_width = self.display_surface.get_size()[0] // 2
+        self.half_height = self.display_surface.get_size()[1] // 2
+        self.offset = pygame.math.Vector2()
+        
+    def custom_draw(self, player):
+        self.offset.x = player.rect.centerx - self.half_width
+        self.offset.y = player.rect.centery - self.half_height
+        
+        # for sprite in self.sprites():
+        for sprite in sorted(self.sprites(), key = lambda sprite: sprite.rect.centery):
+            offset_pos = sprite.rect.topleft - self.offset
+            self.display_surface.blit(sprite.image, offset_pos)
+        

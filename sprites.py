@@ -34,6 +34,8 @@ class Sprite(pygame.sprite.Sprite):
         self.width = TILE_SIZE
         self.height = TILE_SIZE
         
+        self.x_overlap_offset = 0
+        self.y_overlap_offset = 0
         #######################################################################
         ########################## STATUS #####################################
         #######################################################################
@@ -45,6 +47,7 @@ class Sprite(pygame.sprite.Sprite):
         ## Current Location
         self.x = x * TILE_SIZE
         self.y = y * TILE_SIZE
+        self.pos = [self.x, self.y]
         
         
     def load_sprite(self, x_start, y_start):
@@ -52,9 +55,10 @@ class Sprite(pygame.sprite.Sprite):
         self.image = self.spritesheet.get_sprite(x_start, y_start, self.width, self.height)
         
         ## Load collision box
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect(topleft = self.pos)
         self.rect.x = self.x
         self.rect.y = self.y
+        self.hitbox = self.rect.inflate(self.x_overlap_offset, self.y_overlap_offset)
 
     def load_animations(self, x_start, y_start):
         ## Load animations
@@ -64,9 +68,11 @@ class Sprite(pygame.sprite.Sprite):
             self.animations.append(self.spritesheet.get_sprite(x_start + (self.width * frame), y_start, self.width, self.height))
         
         ## Load collision box
-        self.rect = self.animations[0].get_rect()
+        self.image = self.down_animations[0]
+        self.rect = self.image.get_rect(topleft = self.pos)
         self.rect.x = self.x
         self.rect.y = self.y
+        self.hitbox = self.rect.inflate(self.x_overlap_offset, self.y_overlap_offset)
         
     def load_animations_directional(self, x_start, y_start):
         ## Load animations
@@ -84,9 +90,10 @@ class Sprite(pygame.sprite.Sprite):
         
         ## Load collision box
         self.image = self.down_animations[0]
-        self.rect = self.down_animations[0].get_rect()
+        self.rect = self.image.get_rect(topleft = self.pos)
         self.rect.x = self.x
         self.rect.y = self.y
+        self.hitbox = self.rect.inflate(self.x_overlap_offset, self.y_overlap_offset)
 
                     
     def animate(self):
